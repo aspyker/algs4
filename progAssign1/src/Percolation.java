@@ -1,11 +1,8 @@
-import java.text.MessageFormat;
-
-
-
 public class Percolation {
     private WeightedQuickUnionUF wquuf;
+    //private QuickFindUF wquuf;
     
-    private boolean gridOpenSites[][];
+    private boolean[][] gridOpenSites;
     private int sizeOfGrid;
     private int virtualTopIndex;
     private int virtualBottomIndex;
@@ -13,8 +10,10 @@ public class Percolation {
     // create N-by-N grid, with all sites blocked
     public Percolation(int N) {
         gridOpenSites = new boolean[N][N];
-        // grid of N*N plus virtual nodes for virtual top (N -1) and virtual bottom (N -2)
+        // grid of N*N plus virtual nodes for virtual
+        // top (N -1) and virtual bottom (N -2)
         wquuf = new WeightedQuickUnionUF(N*N + 2);
+        //wquuf = new QuickFindUF(N*N + 2);
         virtualTopIndex = N*N + 2 - 1;
         virtualBottomIndex = N*N + 2 - 2;
         sizeOfGrid = N;
@@ -102,7 +101,7 @@ public class Percolation {
         System.out.println("perculates = " + percolates() + "\n");
     }
     
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         Percolation p = new Percolation(5);
         p.open(0, 0);
         p.printGrid();
@@ -133,7 +132,9 @@ public class Percolation {
         int quLoc = getWhereInWeightedDS(i, j);
         boolean isOpen = gridOpenSites[i][j];
         boolean isConnectedToTop = wquuf.connected(quLoc, virtualTopIndex);
-//        System.out.println(String.format("** for i = %d, j = %d - isOpen = %b, isConnecteToTop = %b", i, j, isOpen, isConnectedToTop));
+        //System.out.println(String.format(
+        //"** for i = %d, j = %d - isOpen = %b, isConnecteToTop = %b",
+        //i, j, isOpen, isConnectedToTop));
         return isOpen && isConnectedToTop;
     }
 

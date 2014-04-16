@@ -1,26 +1,35 @@
 public class PercolationStats {
+    private double[] percolationThreshHoldPercentage;
+    private int t;
+    
     // perform T independent computational experiments on an N-by-N grid
     public PercolationStats(int N, int T) {
+        percolationThreshHoldPercentage = new double[T];
+        t = T;
     }
 
     // sample mean of percolation threshold
+    // (referred to as u in formulas)
     public double mean() {
-        return 0.0;
+        return StdStats.mean(percolationThreshHoldPercentage);
     }
 
     // sample standard deviation of percolation threshold
+    // (referred to as o and o^2 in formulas)
     public double stddev() {
-        return 0.0;
+        return StdStats.stddev(percolationThreshHoldPercentage);
     }
 
     // returns lower bound of the 95% confidence interval
+    // formulas say u  - (1.96o) / sqrt(t)
     public double confidenceLo() {
-        return 0.0;
+        return mean() - (1.96 * stddev() / Math.sqrt(t));
     }
 
     // returns upper bound of the 95% confidence interval
+    // formulas say u  - (1.96o) / sqrt(t)
     public double confidenceHi() {
-        return 0.0;
+        return mean() + (1.96 * stddev() / Math.sqrt(t));
     }
 
     // test client, described below
@@ -32,7 +41,8 @@ public class PercolationStats {
         int t = Integer.parseInt(args[1]);
         int n = Integer.parseInt(args[0]);
         
-        double runningAverage = 0.0;
+        PercolationStats ps = new PercolationStats(n, t);
+        Stopwatch watch = new Stopwatch();
         for (int ii = 0; ii < t; ii++) {
             Percolation p = new Percolation(n);
             int openSites = 0;
@@ -50,11 +60,16 @@ public class PercolationStats {
                 }
             }
             //p.printGrid();
-            double percentage = (double)openSites/((double)(n * n));
-           
-            runningAverage = (runningAverage == 0.0) ? percentage : (runningAverage + percentage) / 2.0; 
-            System.out.println(String.format("openSites = %d, percentage = %f", openSites, percentage));
+            double percentage = (double) openSites/((double) (n * n));
+            ps.percolationThreshHoldPercentage[ii] = percentage;
         }
-        System.out.println(String.format("average percent = %f", runningAverage));
+        double elapsedTime = watch.elapsedTime();
+        System.out.println(String.format("mean = %f", ps.mean()));
+        System.out.println(String.format("stddev = %f", ps.stddev()));
+        System.out.println(
+                String.format("95%% confidence interval = %f, %f",
+                ps.confidenceLo(), ps.confidenceHi()));
+        System.out.println(
+                String.format("running time in seconds = %f", elapsedTime));
     }
 }
