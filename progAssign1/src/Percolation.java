@@ -26,47 +26,50 @@ public class Percolation {
 
     // open site (row i, column j) if it is not already
     public void open(int i, int j) {
-        if (i > sizeOfGrid - 1 && j > sizeOfGrid - 1) {
+        int iminusone = i - 1;
+        int jminusone = j - 1;
+        
+        if (iminusone > sizeOfGrid - 1 && jminusone > sizeOfGrid - 1) {
             throw new IndexOutOfBoundsException();
         }
         
 //        System.out.println(String.format("*** opening %d,%d", i, j));        
-        gridOpenSites[i][j] = true;
+        gridOpenSites[iminusone][jminusone] = true;
         
-        int quLoc = getWhereInWeightedDS(i, j);
+        int quLoc = getWhereInWeightedDS(iminusone, jminusone);
         
-        if (i > 0) {
+        if (iminusone > 0) {
             // connect to above
-            boolean isAboveOpen = gridOpenSites[i - 1][j];
+            boolean isAboveOpen = gridOpenSites[iminusone - 1][jminusone];
             if (isAboveOpen) {
-                wquuf.union(quLoc, getWhereInWeightedDS(i - 1, j));
+                wquuf.union(quLoc, getWhereInWeightedDS(iminusone - 1, jminusone));
             }
         }
-        else if (i == 0) {
+        else if (iminusone == 0) {
             wquuf.union(quLoc, virtualTopIndex);
         }
-        if (j > 0) {
+        if (jminusone > 0) {
             // connect to left
-            boolean isLeftOpen = gridOpenSites[i][j - 1];
+            boolean isLeftOpen = gridOpenSites[iminusone][jminusone - 1];
             if (isLeftOpen) {
-                wquuf.union(quLoc, getWhereInWeightedDS(i, j - 1));
+                wquuf.union(quLoc, getWhereInWeightedDS(iminusone, jminusone - 1));
             }
         }
-        if (j < sizeOfGrid - 1) {
+        if (jminusone < sizeOfGrid - 1) {
             // connect to right
-            boolean isRightOpen = gridOpenSites[i][j + 1];
+            boolean isRightOpen = gridOpenSites[iminusone][jminusone + 1];
             if (isRightOpen) {
-                wquuf.union(quLoc, getWhereInWeightedDS(i, j + 1));
+                wquuf.union(quLoc, getWhereInWeightedDS(iminusone, jminusone + 1));
             }
         }
-        if (i < sizeOfGrid - 1) {
+        if (iminusone < sizeOfGrid - 1) {
             // connect to below
-            boolean isBelowOpen = gridOpenSites[i + 1][j];
+            boolean isBelowOpen = gridOpenSites[iminusone + 1][jminusone];
             if (isBelowOpen) {
-                wquuf.union(quLoc, getWhereInWeightedDS(i + 1, j));
+                wquuf.union(quLoc, getWhereInWeightedDS(iminusone + 1, jminusone));
             }
         }
-        else if (i == sizeOfGrid - 1) {
+        else if (iminusone == sizeOfGrid - 1) {
             wquuf.union(quLoc, virtualBottomIndex);
         }
     }
@@ -74,17 +77,17 @@ public class Percolation {
     // is site (row i, column j) open?
     public boolean isOpen(int i, int j) {
         // the below isn't really needed as Java would throw this on the first access
-        if (i > sizeOfGrid - 1 && j > sizeOfGrid - 1) {
+        if (i > sizeOfGrid && j > sizeOfGrid) {
             throw new IndexOutOfBoundsException();
         }
-        return gridOpenSites[i][j];
+        return gridOpenSites[i - 1][j - 1];
     }
     
     public void printGrid() {
-        for (int ii = 0; ii < sizeOfGrid; ii++) {
+        for (int ii = 1; ii <= sizeOfGrid; ii++) {
             String line = "";
             line = line + '[';
-            for (int jj = 0; jj < sizeOfGrid; jj++) {
+            for (int jj = 1; jj <= sizeOfGrid; jj++) {
                 if (isFull(ii, jj)) {
                     line = line + '*';
                 }
@@ -103,9 +106,6 @@ public class Percolation {
     
     public static void main(String[] args) {
         Percolation p = new Percolation(5);
-        p.open(0, 0);
-        p.printGrid();
-        p.open(0, 1);
         p.printGrid();
         p.open(1, 1);
         p.printGrid();
@@ -126,11 +126,11 @@ public class Percolation {
     // is site (row i, column j) full?
     public boolean isFull(int i, int j) {
         // the below isn't really needed as Java would throw this on the first access
-        if (i > sizeOfGrid - 1 && j > sizeOfGrid - 1) {
+        if (i > sizeOfGrid && j > sizeOfGrid) {
             throw new IndexOutOfBoundsException();
         }
-        int quLoc = getWhereInWeightedDS(i, j);
-        boolean isOpen = gridOpenSites[i][j];
+        int quLoc = getWhereInWeightedDS(i - 1, j - 1);
+        boolean isOpen = gridOpenSites[i - 1][j - 1];
         boolean isConnectedToTop = wquuf.connected(quLoc, virtualTopIndex);
         //System.out.println(String.format(
         //"** for i = %d, j = %d - isOpen = %b, isConnecteToTop = %b",
