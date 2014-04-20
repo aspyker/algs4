@@ -83,59 +83,19 @@ public class Percolation {
         return gridOpenSites[i - 1][j - 1];
     }
     
-    public void printGrid() {
-        for (int ii = 1; ii <= sizeOfGrid; ii++) {
-            String line = "";
-            line = line + '[';
-            for (int jj = 1; jj <= sizeOfGrid; jj++) {
-                if (isFull(ii, jj)) {
-                    line = line + '*';
-                }
-                else if (isOpen(ii, jj)) {
-                    line = line + 'O';
-                }
-                else {
-                    line = line + '-';
-                }
-            }
-            line = line + ']';
-            System.out.println(line);
-        }
-        System.out.println("perculates = " + percolates() + "\n");
-    }
-    
-    public static void main(String[] args) {
-        Percolation p = new Percolation(5);
-        p.printGrid();
-        p.open(1, 1);
-        p.printGrid();
-        p.open(2, 4);
-        p.printGrid();
-        p.open(3, 4);
-        p.printGrid();
-        p.open(4, 4);
-        p.printGrid();
-        p.open(2, 2);
-        p.printGrid();
-        p.open(2, 3);
-        p.printGrid();
-        p.open(2, 1);
-        p.printGrid();
-    }
-
     // is site (row i, column j) full?
     public boolean isFull(int i, int j) {
         // the below isn't really needed as Java would throw this on the first access
         if (i > sizeOfGrid && j > sizeOfGrid) {
             throw new IndexOutOfBoundsException();
         }
-        int quLoc = getWhereInWeightedDS(i - 1, j - 1);
         boolean isOpen = gridOpenSites[i - 1][j - 1];
+        if (!isOpen) {
+            return false;
+        }
+        int quLoc = getWhereInWeightedDS(i - 1, j - 1);
         boolean isConnectedToTop = wquuf.connected(quLoc, virtualTopIndex);
-        //System.out.println(String.format(
-        //"** for i = %d, j = %d - isOpen = %b, isConnecteToTop = %b",
-        //i, j, isOpen, isConnectedToTop));
-        return isOpen && isConnectedToTop;
+        return isConnectedToTop;
     }
 
     // does the system percolate?
