@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 import java.awt.Font;
+import java.io.IOException;
 
 public class PercolationVisualizer {
 
@@ -61,6 +62,10 @@ public class PercolationVisualizer {
     public static void main(String[] args) {
         In in = new In(args[0]);      // input file
         int N = in.readInt();         // N-by-N percolation system
+        
+        int siteToCheckI = Integer.parseInt(args[1]);
+        int siteToCheckJ = Integer.parseInt(args[2]);
+        int iterationsToPause = Integer.parseInt(args[3]);
 
         // turn on animation mode
         StdDraw.show(0);
@@ -69,10 +74,26 @@ public class PercolationVisualizer {
         Percolation perc = new Percolation(N);
         draw(perc, N);
         StdDraw.show(DELAY);
+        int ii = 0;
         while (!in.isEmpty()) {
+            ii++;
             int i = in.readInt();
             int j = in.readInt();
             perc.open(i, j);
+            //if (ii == 231) { try { System.in.read(); } catch (IOException ioe) { ioe.printStackTrace(); } }
+            System.out.println(
+                String.format("%d - isFull(%d, %d) = %b",
+                    ii,
+                    siteToCheckI,
+                    siteToCheckJ,
+                    perc.isFull(siteToCheckI, siteToCheckJ)
+                )
+            );
+            if (ii == iterationsToPause) {
+                System.out.println("*** pausing");
+                try { System.in.read(); } catch (IOException ioe) { ioe.printStackTrace(); }
+            }
+               
             draw(perc, N);
             StdDraw.show(DELAY);
         }
