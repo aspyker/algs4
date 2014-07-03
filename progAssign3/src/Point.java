@@ -21,7 +21,9 @@ public class Point implements Comparable<Point> {
             double p1Slope = slopeTo(p1);
             double p2Slope = slopeTo(p2);
             // TODO:  From text "Treat horizontal, vertical, and degenerate line segments as in the slopeTo() method"
-            return new Double(p1Slope).compareTo(p2Slope);
+            int compare = new Double(p1Slope).compareTo(p2Slope);
+//            System.out.println("comparing slope of " + p1Slope + " to slope " + p2Slope + ", returning " + compare);
+            return compare;
         }
     };
 
