@@ -17,12 +17,26 @@ public class Solver {
         while (!min.board.isGoal()) {
             Iterator<Board> neighbors = min.board.neighbors().iterator();
             while (neighbors.hasNext()) {
-                PQNode node = new PQNode(neighbors.next(), min.moves + 1, min);
-                pq.insert(node);
+                Board neighbor = neighbors.next();
+                if (!seenBefore(neighbor, min)) {
+                    PQNode node = new PQNode(neighbor, min.moves + 1, min);
+                    pq.insert(node);
+                }
             }
             min = (PQNode)pq.delMin();
         }
         finalMin = min;
+    }
+    
+    private boolean seenBefore(Board newBoard, PQNode existingBoards) {
+        PQNode curNode = existingBoards.prevBoardNode;
+        while (curNode != null) {
+            if (newBoard.equals(existingBoards.board)) {
+                return true;
+            }
+            curNode = curNode.prevBoardNode;
+        }
+        return false;
     }
     
     public boolean isSolvable() {
@@ -88,6 +102,13 @@ public class Solver {
             this.board = board;
             this.moves = moves;
             this.prevBoardNode = prevBoardNode;
+        }
+        
+        public String toString() {
+            StringBuffer sb = new StringBuffer();
+            sb.append("PQNode (moves = " + moves + ", minManhattan = " + board.manhattan() + ")\n");
+            sb.append(board.toString() + "\n");
+            return sb.toString();
         }
     }
 }

@@ -71,5 +71,5 @@ public class BoardTest {
             num++;
         }
         Assert.assertEquals(num, 4);
-    }
+    }    
 }

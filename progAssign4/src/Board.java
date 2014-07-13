@@ -70,9 +70,19 @@ public class Board {
         throw new UnsupportedOperationException();
     }
     
-    public boolean equals(Object y) {
+    public boolean equals(Object otherO) {
         // does this board equal y?
-        Board other = (Board)y;
+        
+        if (otherO == this) return true;
+        if (otherO == null) return false;
+        if (otherO.getClass() != getClass()) return false;
+        
+        Board other = (Board)otherO;
+        
+        if (other.N != N) {
+            return false;
+        }
+            
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (tiles[i][j] != other.tiles[i][j]) {
@@ -126,7 +136,7 @@ public class Board {
         return boards;
     }
     
-    public static int[][] getNeighbor(int[][] orig, int zeroI, int zeroJ, int swapI, int swapJ) {
+    private static int[][] getNeighbor(int[][] orig, int zeroI, int zeroJ, int swapI, int swapJ) {
         int M = orig[0].length;
         int[][] newTiles = new int[M][M];
         for (int i = 0; i < M; i++) {
