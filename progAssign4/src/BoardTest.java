@@ -71,5 +71,14 @@ public class BoardTest {
             num++;
         }
         Assert.assertEquals(num, 4);
-    }    
+    }
+    
+    @Test
+    public void testTwin() {
+        Board b;
+        b = buildBoardFromInputFile("8puzzle-testing/puzzle2x2-unsolvable1.txt");
+        Board twin1 = b.twin();
+        Board twin2 = twin1.twin();
+        Assert.assertTrue(b.equals(twin2));
+    }
 }

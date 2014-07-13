@@ -67,7 +67,24 @@ public class Board {
     
     public Board twin() {
         // a board obtained by exchanging two adjacent blocks in the same row
-        throw new UnsupportedOperationException();
+        // "To detect such situations, use the fact that boards are divided into two equivalence classes with respect
+        // to reachability: (i) those that lead to the goal board and (ii) those that lead to the goal board if we
+        // modify the initial board by swapping any pair of adjacent (non-blank) blocks in the same row"
+        
+        int i = 0, j = 0;
+        outerloop:
+        for (; i < N; i++) {
+            j = 0;
+            for (; j < N - 1; j++) {
+                int first = tiles[i][j];
+                int second = tiles[i][j+1];
+                if (first != 0 && second != 0) {
+                    break outerloop;
+                }
+            }
+        }
+        int[][] twin = swappedArray(tiles, i, j, i, j + 1);
+        return new Board(twin);
     }
     
     public boolean equals(Object otherO) {
@@ -112,23 +129,23 @@ public class Board {
         }
         
         if (zeroI > 0) { // left open
-            int[][] newTiles = getNeighbor(tiles, zeroI, zeroJ, zeroI - 1, zeroJ);
+            int[][] newTiles = swappedArray(tiles, zeroI, zeroJ, zeroI - 1, zeroJ);
             Board b = new Board(newTiles);
             boards.push(b);
         }
         
         if (zeroI <= N - 2) { // right open
-            int[][] newTiles = getNeighbor(tiles, zeroI, zeroJ, zeroI + 1, zeroJ);
+            int[][] newTiles = swappedArray(tiles, zeroI, zeroJ, zeroI + 1, zeroJ);
             Board b = new Board(newTiles);
             boards.push(b);
         }
         if (zeroJ > 0) { // above open
-            int[][] newTiles = getNeighbor(tiles, zeroI, zeroJ, zeroI, zeroJ - 1);
+            int[][] newTiles = swappedArray(tiles, zeroI, zeroJ, zeroI, zeroJ - 1);
             Board b = new Board(newTiles);
             boards.push(b);
         }
         if (zeroJ <= N - 2) { // below open
-            int[][] newTiles = getNeighbor(tiles, zeroI, zeroJ, zeroI, zeroJ + 1);
+            int[][] newTiles = swappedArray(tiles, zeroI, zeroJ, zeroI, zeroJ + 1);
             Board b = new Board(newTiles);
             boards.push(b);
         }
@@ -136,16 +153,16 @@ public class Board {
         return boards;
     }
     
-    private static int[][] getNeighbor(int[][] orig, int zeroI, int zeroJ, int swapI, int swapJ) {
+    private static int[][] swappedArray(int[][] orig, int firstSwapI, int firstSwapJ, int secondSwapI, int secondSwapJ) {
         int M = orig[0].length;
         int[][] newTiles = new int[M][M];
         for (int i = 0; i < M; i++) {
             for (int j = 0; j < M; j++) {
-                if (i == swapI && j == swapJ) {
-                    newTiles[i][j] = 0;
+                if (i == secondSwapI && j == secondSwapJ) {
+                    newTiles[i][j] = orig[firstSwapI][firstSwapJ];
                 }
-                else if (i == zeroI && j == zeroJ) {
-                    newTiles[i][j] = orig[swapI][swapJ];
+                else if (i == firstSwapI && j == firstSwapJ) {
+                    newTiles[i][j] = orig[secondSwapI][secondSwapJ];
                 }
                 else {
                     newTiles[i][j] = orig[i][j];

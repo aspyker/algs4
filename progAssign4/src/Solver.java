@@ -3,19 +3,33 @@ import java.util.Iterator;
 
 public class Solver {
     private MinPQ<PQNode> pq;
-    private PQNode finalMin;
+    private MinPQ<PQNode> pqTwin;
+    private PQNode finalMin = null;
+    private boolean unsolvable = false;
     
     public Solver(Board initial) {
         // find a solution to the initial board (using the A* algorithm)
+        
+        Board twin = initial.twin();
+        
         PQNodeManhattenComparator comparator = new PQNodeManhattenComparator();
+        
         pq = new MinPQ<PQNode>(comparator);
+        pqTwin = new MinPQ<PQNode>(comparator);
         
         PQNode nodeInitial = new PQNode(initial, 0, null);
+        PQNode nodeInitialTwin = new PQNode(twin, 0, null);
+        
         pq.insert(nodeInitial);
+        pqTwin.insert(nodeInitialTwin);
         
         PQNode min = (PQNode)pq.delMin();
-        while (!min.board.isGoal()) {
+        PQNode minTwin = (PQNode)pqTwin.delMin();
+        
+        while (!(min.board.isGoal() || minTwin.board.isGoal())) {
             Iterator<Board> neighbors = min.board.neighbors().iterator();
+            Iterator<Board> neighborsTwin = minTwin.board.neighbors().iterator();
+            
             while (neighbors.hasNext()) {
                 Board neighbor = neighbors.next();
                 if (!seenBefore(neighbor, min)) {
@@ -23,15 +37,30 @@ public class Solver {
                     pq.insert(node);
                 }
             }
+            
+            // twin
+            while (neighborsTwin.hasNext()) {
+                Board neighbor = neighborsTwin.next();
+                if (!seenBefore(neighbor, minTwin)) {
+                    PQNode node = new PQNode(neighbor, minTwin.moves + 1, minTwin);
+                    pqTwin.insert(node);
+                }
+            }
+            
             min = (PQNode)pq.delMin();
+            minTwin = (PQNode)pqTwin.delMin();
+        }
+        
+        if (minTwin.board.isGoal()) {
+            unsolvable = true;
         }
         finalMin = min;
     }
     
     private boolean seenBefore(Board newBoard, PQNode existingBoards) {
-        PQNode curNode = existingBoards.prevBoardNode;
+        PQNode curNode = existingBoards;
         while (curNode != null) {
-            if (newBoard.equals(existingBoards.board)) {
+            if (newBoard.equals(curNode.board)) {
                 return true;
             }
             curNode = curNode.prevBoardNode;
@@ -41,17 +70,22 @@ public class Solver {
     
     public boolean isSolvable() {
         // is the initial board solvable?
-        // TODO:  Implement
-        return true;
+        return !unsolvable;
     }
     
     public int moves() {
         // min number of moves to solve initial board; -1 if no solution
+        if (unsolvable) {
+            return -1;
+        }
         return finalMin.moves;
     }
     
     public Iterable<Board> solution() {
         // sequence of boards in a shortest solution; null if no solution
+        if (unsolvable) {
+            return null;
+        }
         Stack<Board> history = new Stack<Board>();
         PQNode curNode = finalMin;
         while (curNode != null) {
