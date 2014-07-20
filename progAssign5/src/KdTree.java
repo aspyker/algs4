@@ -49,7 +49,7 @@ public class KdTree {
                 return; // trying to insert the same point;
             }
             int compare = verticalLevel ? compareVert(p, cur.p) : compareHoriz(p, cur.p);
-            if (compare > 0) {
+            if (compare >= 0) {
                 if (cur.rt != null) {
                     cur = cur.rt;
                     level++;
@@ -73,7 +73,7 @@ public class KdTree {
                 size++;
                 return;
             }
-            else { // (compare <= 0) {
+            else { // if (compare < 0) {
                 if (cur.lb != null) {
                     cur = cur.lb;
                     level++;
@@ -122,12 +122,12 @@ public class KdTree {
         int level = 0;
         
         while (cur != null) {
+            if (p.equals(cur.p)) {
+                return true;
+            }
             boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
             int compare = verticalLevel ? compareVert(p, cur.p) : compareHoriz(p, cur.p);
-            if (compare == 0) {
-                return true; // trying to insert the same point
-            }
-            else if (compare > 0) {
+            if (compare >= 0) {
                 if (cur.rt != null) {
                     cur = cur.rt;
                     level++;
@@ -135,9 +135,9 @@ public class KdTree {
                 }
                 return false;
             }
-            else if (compare < 0) {
-                if (cur.rt != null) {
-                    cur = cur.rt;
+            else { // if (compare < 0) {
+                if (cur.lb != null) {
+                    cur = cur.lb;
                     level++;
                     continue;
                 }
@@ -145,6 +145,7 @@ public class KdTree {
             }
         }
         
+        // TODO:  Fix this
         throw new RuntimeException("should never get here");
     }
 
@@ -220,18 +221,18 @@ public class KdTree {
             foundPoints.add(curNode.p);
         }
         if (verticalLevel) {
-            if (curNode.lb != null && rect.ymin() <= curNode.p.y()) {
+            if (curNode.lb != null && rect.ymin() < curNode.p.y()) {
                 rangeSearchTree(rect, curNode.lb, foundPoints, level+1);
             }
-            else if (curNode.rt != null && rect.ymax() > curNode.p.y()) {
+            if (curNode.rt != null && rect.ymax() >= curNode.p.y()) {
                 rangeSearchTree(rect, curNode.rt, foundPoints, level+1);
             }
         }
         else { // horizontal
-            if (curNode.lb != null && rect.xmin() <= curNode.p.x()) {
+            if (curNode.lb != null && rect.xmin() < curNode.p.x()) {
                 rangeSearchTree(rect, curNode.lb, foundPoints, level+1);
             }
-            else if (curNode.rt != null && rect.xmax() > curNode.p.x()) {
+            if (curNode.rt != null && rect.xmax() >= curNode.p.x()) {
                 rangeSearchTree(rect, curNode.rt, foundPoints, level+1);
             }
         }
