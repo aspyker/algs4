@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class KdTree {
     private Node root;
     private int size;
@@ -43,11 +45,11 @@ public class KdTree {
         int level = 0;
         while (cur != null) {
             boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
-            int compare = verticalLevel ? compareVert(p, cur.p) : compareHoriz(p, cur.p);
-            if (compare == 0) {
-                return; // trying to insert the same point
+            if (p.equals(cur.p)) {
+                return; // trying to insert the same point;
             }
-            else if (compare > 0) {
+            int compare = verticalLevel ? compareVert(p, cur.p) : compareHoriz(p, cur.p);
+            if (compare > 0) {
                 if (cur.rt != null) {
                     cur = cur.rt;
                     level++;
@@ -71,7 +73,7 @@ public class KdTree {
                 size++;
                 return;
             }
-            else if (compare < 0) {
+            else { // (compare <= 0) {
                 if (cur.lb != null) {
                     cur = cur.lb;
                     level++;
@@ -155,6 +157,7 @@ public class KdTree {
     
     private void drawNodeAndSubNodes(Node node) {
         if (node != null) {
+            StdDraw.show(1000);
             StdDraw.setPenColor(StdDraw.BLACK);
             StdDraw.setPenRadius(0.01);
             StdDraw.point(node.p.x(), node.p.y());
@@ -183,7 +186,55 @@ public class KdTree {
      * @return
      */
     public Iterable<Point2D> range(RectHV rect) {
-        throw new UnsupportedOperationException();
+        ArrayList<Point2D> list = new ArrayList<Point2D>();
+        rangeSearchTree(rect, root, list, 0);
+        return list;
+        
+//        while (cur != null) {
+//            boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
+//            if (rect.contains(cur.p)) {
+//                list.add(cur.p);
+//            }
+//            if (verticalLevel) {
+//                if (cur.lb != null && rect.ymin() < cur.p.y()) {
+//                    // need to look in bottom
+//                }
+//                else if (cur.rt != null && rect.ymax() > cur.p.y()) {
+//                    // need to look in top
+//                }
+//            }
+//            else { // horizontal
+//                if (cur.lb != null && rect.xmin() < cur.p.x()) {
+//                    // need to look in left
+//                }
+//                else if (cur.rt != null && rect.xmax() > cur.p.x()) {
+//                    // need to look in right
+//                }
+//            }
+//        }
+    }
+    
+    private void rangeSearchTree(RectHV rect, Node curNode, ArrayList<Point2D> foundPoints, int level) {
+        boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
+        if (rect.contains(curNode.p)) {
+            foundPoints.add(curNode.p);
+        }
+        if (verticalLevel) {
+            if (curNode.lb != null && rect.ymin() <= curNode.p.y()) {
+                rangeSearchTree(rect, curNode.lb, foundPoints, level+1);
+            }
+            else if (curNode.rt != null && rect.ymax() > curNode.p.y()) {
+                rangeSearchTree(rect, curNode.rt, foundPoints, level+1);
+            }
+        }
+        else { // horizontal
+            if (curNode.lb != null && rect.xmin() <= curNode.p.x()) {
+                rangeSearchTree(rect, curNode.lb, foundPoints, level+1);
+            }
+            else if (curNode.rt != null && rect.xmax() > curNode.p.x()) {
+                rangeSearchTree(rect, curNode.rt, foundPoints, level+1);
+            }
+        }
     }
 
     /**
