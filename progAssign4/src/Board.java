@@ -6,7 +6,13 @@ public class Board {
         // construct a board from an N-by-N array of blocks
         // (where blocks[i][j] = block in row i, column j)
         N = blocks[0].length;
-        tiles = blocks;
+        
+        tiles = new int[N][N];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                tiles[i][j] = blocks[i][j];
+            }
+        }
     }
 
     public int dimension() {
