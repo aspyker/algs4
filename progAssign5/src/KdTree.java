@@ -3,6 +3,7 @@ import java.util.ArrayList;
 public class KdTree {
     private Node root;
     private int size;
+    //public int nodesVis = 0;
 
     /**
      * construct an empty set of points
@@ -118,7 +119,6 @@ public class KdTree {
      */
     public boolean contains(Point2D p) {
         Node cur = root;
-        
         int level = 0;
         
         while (cur != null) {
@@ -144,9 +144,7 @@ public class KdTree {
                 return false;
             }
         }
-        
-        // TODO:  Fix this
-        throw new RuntimeException("should never get here");
+        return false;
     }
 
     /**
@@ -188,31 +186,11 @@ public class KdTree {
      */
     public Iterable<Point2D> range(RectHV rect) {
         ArrayList<Point2D> list = new ArrayList<Point2D>();
+        if (root == null) {
+            return list;
+        }
         rangeSearchTree(rect, root, list, 0);
         return list;
-        
-//        while (cur != null) {
-//            boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
-//            if (rect.contains(cur.p)) {
-//                list.add(cur.p);
-//            }
-//            if (verticalLevel) {
-//                if (cur.lb != null && rect.ymin() < cur.p.y()) {
-//                    // need to look in bottom
-//                }
-//                else if (cur.rt != null && rect.ymax() > cur.p.y()) {
-//                    // need to look in top
-//                }
-//            }
-//            else { // horizontal
-//                if (cur.lb != null && rect.xmin() < cur.p.x()) {
-//                    // need to look in left
-//                }
-//                else if (cur.rt != null && rect.xmax() > cur.p.x()) {
-//                    // need to look in right
-//                }
-//            }
-//        }
     }
     
     private void rangeSearchTree(RectHV rect, Node curNode, ArrayList<Point2D> foundPoints, int level) {
@@ -245,7 +223,125 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-        throw new UnsupportedOperationException();
+        if (root == null) {
+            return null;
+        }
+        BestPoint bp = new BestPoint(root.p, p.distanceTo(root.p));
+        return nearestSearchTree(p, bp, root, 0).p;
+    }
+    
+    private BestPoint nearestSearchTree(Point2D searchPoint, BestPoint champion, Node curNode, int level) {
+        boolean verticalLevel = (level % 2) == 1; // l = 0 false (horiz), l = 1 true, l = 2 false
+        
+        if (curNode == null) {
+            return champion;
+        }
+        
+        //nodesVis++;
+        double distance = searchPoint.distanceTo(curNode.p);
+        if (distance < champion.distance) {
+            champion = new BestPoint(curNode.p, distance);
+        }
+        
+        if (verticalLevel) {
+            double yDiff = searchPoint.y() - curNode.p.y();
+            if (yDiff >= 0) { // search point is above(or same y) of curPoint
+                // go towards above first
+                BestPoint rtBest = nearestSearchTree(searchPoint, champion, curNode.rt, level + 1);
+                if (rtBest.distance < champion.distance) {
+                    champion = rtBest;
+                }
+                if (champion.distance >= yDiff) {
+                    BestPoint lbBest = nearestSearchTree(searchPoint, champion, curNode.lb, level + 1);
+                    if (lbBest.distance < champion.distance) {
+                        champion = lbBest;
+                    }
+                }
+            }
+            else { // search point is below curPoint
+                yDiff = -yDiff;
+                BestPoint lbBest = nearestSearchTree(searchPoint, champion, curNode.lb, level + 1);
+                if (lbBest.distance < champion.distance) {
+                    champion = lbBest;
+                }
+                if (champion.distance >= yDiff) {
+                    BestPoint rtBest = nearestSearchTree(searchPoint, champion, curNode.rt, level + 1);
+                    if (rtBest.distance < champion.distance) {
+                        champion = rtBest;
+                    }
+                }
+            }
+        }
+        else { // horizontal
+            double xDiff = searchPoint.x() - curNode.p.x();
+            if (xDiff >= 0) { // search point is to right(or same x) of curPoint
+                // go towards right first
+                BestPoint rtBest = nearestSearchTree(searchPoint, champion, curNode.rt, level + 1);
+                if (rtBest.distance < champion.distance) {
+                    champion = rtBest;
+                }
+                if (champion.distance >= xDiff) {
+                    BestPoint lbBest = nearestSearchTree(searchPoint, champion, curNode.lb, level + 1);
+                    if (lbBest.distance < champion.distance) {
+                        champion = lbBest;
+                    }
+                }
+            }
+            else { // search point is to left of curPoint
+                // go towards left first
+                xDiff = -xDiff;
+                BestPoint lbBest = nearestSearchTree(searchPoint, champion, curNode.lb, level + 1);
+                if (lbBest.distance < champion.distance) {
+                    champion = lbBest;
+                }
+                if (champion.distance >= xDiff) {
+                    BestPoint rtBest = nearestSearchTree(searchPoint, champion, curNode.rt, level + 1);
+                    if (rtBest.distance < champion.distance) {
+                        champion = rtBest;
+                    }
+                }
+            }
+        }
+        
+        return champion;
+        
+//        BestPoint lbBest = null;
+//        BestPoint rtBest = null;
+//        if (curNode.lb != null) {
+//            boolean shouldSearchLb = true;
+//            if (verticalLevel) {
+//                // TODO:
+//            }
+//            else { // horizontal
+//                // TODO:
+//            }
+//            if (shouldSearchLb) {
+//                lbBest = nearestSearchTree(searchPoint, champion, curNode.lb, level + 1);
+//                if (lbBest.distance < champion.distance) {
+//                    champion = lbBest;
+//                }
+//            }
+//        }
+//        
+//        if (curNode.rt != null) {
+//            boolean shouldSearchRt = true;
+//            if (verticalLevel) {
+//                // TODO:
+//            }
+//            else { // horizontal
+//                double distanceToAxisAligned = curNode.p.x() - searchPoint.x();
+//                shouldSearchRt = champion.distance > distanceToAxisAligned;
+//            }
+//            
+//            if (shouldSearchRt) {
+//                rtBest = nearestSearchTree(searchPoint, champion, curNode.rt, level + 1);
+//                if (rtBest.distance < champion.distance) {
+//                    champion = rtBest;
+//                }
+//            }
+//        }
+//                
+//        return champion;
     }
     
     private static class Node {
@@ -262,5 +358,15 @@ public class KdTree {
             this.rt = rt;
             this.vertLevel = vertLevel;
         }
-     }
+    }
+    
+    private static class BestPoint {
+        private Point2D p;
+        private double distance;
+
+        public BestPoint(Point2D p, double distance) {
+            this.p = p;
+            this.distance = distance;
+        }
+    }
 }
